@@ -21,9 +21,9 @@ public class ProfileResultServiceImpl implements ProfileResultService {
                 " where field_id in " +
                 " ( select profile_result.field_id from profile_result" +
                 " inner join field f on profile_result.field_id = f.id" +
-                " join tables t on f.tables_id = t.id " +
-                "join owners o on t.owner_id = o.id " +
-                "join sources s on o.source_id = s.id" +
+                " join public.table t on f.tables_id = t.id " +
+                "join owner o on t.owner_id = o.id " +
+                "join source s on o.source_id = s.id" +
                 " where s.id=?)\n";
         jdbcTemplate.update(SQL_SAVE_DOMAIN, preparedStatement
                 -> {
