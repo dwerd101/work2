@@ -6,11 +6,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 @Service
 public class ProfileResultServiceImpl implements ProfileResultService {
+
 
     JdbcTemplate jdbcTemplate;
 
@@ -32,6 +35,20 @@ public class ProfileResultServiceImpl implements ProfileResultService {
         });
     }
 
+    @Override
+    public void saveProfileResult(Long fieldId, LocalDate dateField, String domain, String text) {
+        //language=sql
+        final String SQL_SAVE_PROFILE_RESULT = "insert into profile_result(field_id, date_field, domain, comment)" +
+                " values (?, ?, ?, ?)";
+
+        jdbcTemplate.update(SQL_SAVE_PROFILE_RESULT, preparedStatement -> {
+            preparedStatement.setLong(1,fieldId);
+            preparedStatement.setDate(2, Date.valueOf(dateField));
+            preparedStatement.setString(3,domain);
+            preparedStatement.setString(4, null);
+
+        });
+    }
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

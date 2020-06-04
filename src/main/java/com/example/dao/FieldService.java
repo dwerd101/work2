@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface FieldService {
     List<FieldValueDto> findBySourceId(Long id);
+    List<FieldValueDto> findBySourceByJdbcId(Long id);
 }

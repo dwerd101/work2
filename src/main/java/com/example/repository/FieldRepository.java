@@ -7,13 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface FieldRepository extends JpaRepository<FieldValue, Long> {
+public interface FieldRepository extends JpaRepository<Field, Long> {
     @Query( nativeQuery = true,
-            value= "select *\n" +
-                    "from field_value inner join field f on field_value.field_id = f.id\n" +
-                    "inner join public.table t on f.tables_id = t.id inner join owner o on t.owner_id = o.id\n" +
-                    "inner join source s on o.source_id = s.id\n" +
-                    "where s.id=?1"
+            value= "select type, size, field.field_name\n" +
+                    "                    from field\n" +
+                    "                    inner join public.table  on field.table_id = public.table.id inner join owner o on public.table.owner_id = o.id\n" +
+                    "                    inner join source s on o.source_id = s.id\n" +
+                    "                    where s.id=?1"
     )
-    List<FieldValue> findBySourceId(Long id);
+    List<Field> findBySourceId(Long id);
 }

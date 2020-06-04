@@ -25,4 +25,7 @@ public class FieldValue {
     @Column(name = "value")
     private String value;
 
+    public FieldValue(String value) {
+        this.value = value;
+    }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -31,4 +32,32 @@ public class Field {
     @Column(name = "type")
     // @JsonProperty("type")
     private String type;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Field field = (Field) o;
+
+        if (id != field.id) return false;
+        if (!Objects.equals(fieldName, field.fieldName)) return false;
+        if (!Objects.equals(size, field.size)) return false;
+        return Objects.equals(type, field.type);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (fieldName != null ? fieldName.hashCode() : 0);
+        result = 31 * result + (size != null ? size.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
+    }
+
+    /*  public Field(String fieldName, String size, String type) {
+        this.fieldName=fieldName;
+        this.size=size;
+        this.type=type;
+    }*/
 }
