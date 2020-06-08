@@ -17,6 +17,7 @@ public class ProfileResultServiceImpl implements ProfileResultService {
 
     JdbcTemplate jdbcTemplate;
 
+    //Не используется
     @Override
     public void saveProfileResultDomain(String domain, Long id) {
         //language=sql

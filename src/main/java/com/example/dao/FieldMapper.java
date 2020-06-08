@@ -1,8 +1,7 @@
 package com.example.dao;
 
-import com.example.dto.FieldValueDto;
+import com.example.model.FieldDto;
 import com.example.model.Field;
-import com.example.model.FieldValue;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -17,5 +16,5 @@ public interface FieldMapper {
             @Mapping(target = "type", source = "field.type"),
             @Mapping(target = "size", source = "field.size")
     })
-    FieldValueDto returnDto(Field field);
+    FieldDto returnDto(Field field);
 }

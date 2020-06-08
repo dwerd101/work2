@@ -13,6 +13,19 @@ create table field_value (
 
 );
 
+
+create table profile_task(
+    id serial primary key ,
+    sourceId long,
+    createDate DATE,
+    updateDate DATE,
+    status varchar(255)
+);
+
+create view field_view as
+    select field_id, field.name, field.type, field
+
+
 select *
 from field_value inner join field f on field_value.field_id = f.id
                  inner join tables t on f.tables_id = t.id inner join owners o on t.owner_id = o.id
@@ -33,4 +46,18 @@ where field_id in  (
 select profile_result.field_id
 from profile_result inner join field f on profile_result.field_id = f.id
                     join tables t on f.tables_id = t.id join owners o on t.owner_id = o.id join sources s on o.source_id = s.id
-where s.id=1
+where s.id=1;
+
+create view field_view as
+select field.id, field.field_name, type, size, source_id
+from field inner join "table" t on field.table_id = t.id
+           join owner o on t.owner_id = o.id
+           join source s on o.source_id = s.id;
+
+create table profile_task(
+                             id serial primary key ,
+                             source_id int,
+                             create_date DATE,
+                             update_date DATE,
+                             status varchar(255)
+);

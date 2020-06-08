@@ -1,12 +1,15 @@
 package com.example.dao;
 
-import com.example.dto.FieldValueDto;
-import com.example.model.Field;
-import com.example.model.FieldValue;
+import com.example.model.FieldDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.List;
 
 public interface FieldService {
-    List<FieldValueDto> findBySourceId(Long id);
-    List<FieldValueDto> findBySourceByJdbcId(Long id);
+    Page<FieldDto> findBySourceId(Long id , Pageable pageable);
+   // Page returnPages()
+    List<FieldDto> findBySourceByJdbcId(Long id);
+     Integer count(Long id);
 }

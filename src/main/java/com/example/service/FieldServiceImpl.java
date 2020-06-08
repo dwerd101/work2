@@ -1,20 +1,21 @@
 package com.example.service;
 
 import com.example.dao.FieldService;
-import com.example.dto.FieldValueDto;
+import com.example.model.FieldDto;
 import com.example.model.Field;
 import com.example.model.FieldValue;
 import com.example.repository.FieldRepository;
+import com.example.repository.FieldValueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -25,14 +26,50 @@ import java.util.Set;
 public class FieldServiceImpl implements FieldService {
 
     FieldRepository fieldRep;
+    FieldValueRepository fieldValueRepository;
 
     JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<FieldValueDto> findBySourceId(Long id) {
-        List<Field> fieldValueList = fieldRep.findBySourceId(id);
+    public Page<FieldDto> findBySourceId(Long id, Pageable pageable) {
 
-       /* Set<FieldValueDto> fieldValueDtoSet = fieldValueList
+        //language=SQL
+        String FIND_VALUE = "select value, field_id  from field_value where field_id = ?";
+
+
+        Page<FieldDto> fieldPage = fieldRep.findBySourceId(id,pageable);
+
+        List<FieldDto> fieldDtos = fieldPage.getContent();
+        List<FieldValue> valueList = new ArrayList<>();
+        for (FieldDto f: fieldDtos) {
+           List<FieldValue> tempFieldValueList = jdbcTemplate.query(FIND_VALUE,
+                    preparedStatement -> preparedStatement.setLong(1, f.getFieldId()),
+                    (resultSet, i) -> {
+
+                        Field field = new Field();
+                        String value = resultSet.getString(1);
+                        field.setId(resultSet.getLong(2));
+                        return new FieldValue(value, field);
+                    });
+           valueList.addAll(tempFieldValueList);
+        }
+        for(int i=0; i<valueList.size(); i++) {
+            for(int k=0; k<fieldDtos.size(); k++) {
+                if(valueList.get(i).getFieldId().getId()==fieldDtos.get(k).getFieldId()) {
+                    fieldDtos.get(k).getFieldValue().add(valueList.get(i).getValue());
+                }
+            }
+        }
+
+
+         return new PageImpl<>(fieldDtos, pageable, fieldDtos.size());
+    }
+
+    /*  @Override
+    public List<FieldDto> findBySourceId(Long id, Pageable pageable) {
+       // List<Field> fieldValueList = fieldRep.findBySourceId(id);
+
+       *//* Set<FieldValueDto> fieldValueDtoSet = fieldValueList
                 .stream()
                 .map(fieldValue -> {
                     return FieldMapper
@@ -48,37 +85,52 @@ public class FieldServiceImpl implements FieldService {
                 fieldValueDto.getFieldValue().add(fieldValue.getValue());
             }
         }
-        return new ArrayList<>(fieldValueDtoSet);*/
+        return new ArrayList<>(fieldValueDtoSet);*//*
         return null;
-    }
+    }*/
+
+
 
     @Override
-    public List<FieldValueDto> findBySourceByJdbcId(Long id) {
-        List<Field> fieldList = findBySourceAndReturnListField(id);
+    public Integer count(Long id) {
+       //language=sql
+        final String SQL_COUNT = "select count(1) " +
+                "from field_view\n" +
+                "where source_id=?";
+        Integer count = jdbcTemplate.queryForObject(SQL_COUNT, new Object[] {id}, Integer.class);
+        return count;
+    }
+
+
+    @Override
+    public List<FieldDto> findBySourceByJdbcId(Long id) {
+      /*  List<Field> fieldList = findBySourceAndReturnListField(id);
         List<FieldValue> fieldValueList = new ArrayList<>();
-        List<FieldValueDto> fieldValueDtoList = new ArrayList<>();
-        for (Field field: fieldList
-              ) {
+        List<FieldDto> fieldDtoList = new ArrayList<>();
+        for (Field field: fieldList) {
             fieldValueList.addAll(findByFieldIdAndReturnList(field.getId()));
             List<String> value = new ArrayList<>();
-            for (FieldValue fieldValue: fieldValueList
-                 ) {
+            for (FieldValue fieldValue: fieldValueList) {
                 value.add(fieldValue.getValue());
             }
-            fieldValueDtoList.add(
-                    new FieldValueDto(field.getId(),field.getFieldName(),
+            fieldDtoList.add(
+                    new FieldDto(field.getId(),field.getFieldName(),
                             field.getType(), field.getSize(), value ));
             fieldValueList.clear();
-            //Задействовать FieldValueDto и добавить все поля и конвертнуть FieldValue в String "getText" Не забудь очистить колллекцию fieldValueList
         }
-        return fieldValueDtoList;
+        return fieldDtoList;*/
 
-    }
+   return null; }
 
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Autowired
+    public void setFieldValueRepository(FieldValueRepository fieldValueRepository) {
+        this.fieldValueRepository = fieldValueRepository;
     }
 
     @Autowired
