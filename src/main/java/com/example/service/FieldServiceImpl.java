@@ -92,7 +92,7 @@ public class FieldServiceImpl implements FieldService {
 
 
     @Override
-    public Integer count(Long id) {
+    public Integer countAllFieldDto(Long id) {
        //language=sql
         final String SQL_COUNT = "select count(1) " +
                 "from field_view\n" +

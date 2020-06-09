@@ -11,5 +11,5 @@ public interface FieldService {
     Page<FieldDto> findBySourceId(Long id , Pageable pageable);
    // Page returnPages()
     List<FieldDto> findBySourceByJdbcId(Long id);
-     Integer count(Long id);
+     Integer countAllFieldDto(Long id);
 }

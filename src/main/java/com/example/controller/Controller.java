@@ -4,11 +4,11 @@ import com.example.dao.ProfileResultService;
 import com.example.dao.TaskService;
 import com.example.model.FieldDto;
 import com.example.model.ProfileTask;
-import com.example.service.FieldServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -28,14 +28,22 @@ public class Controller {
     }
 
     @PostMapping("source")
-    public void saveFieldValue(@RequestBody ProfileTask task,  Pageable pageable) {
+    public ResponseEntity saveFieldValue(@RequestBody ProfileTask task, Pageable pageable) {
         if(task.getSourceId()!=null && task.getId()!=null) {
             task.setStatus(ProfileTask.Status.RUNNING.toString());
             taskService.save(task);
-            Page<FieldDto> fieldDtoList = service.findBySourceId(task.getSourceId(), pageable);
-            Integer count = service.count(task.getSourceId());
-            String domainText = "FIO";
+           return returnProfileResult(task,pageable);
+        }
+        else {
+           return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
+    }
+    private ResponseEntity returnProfileResult(ProfileTask task, Pageable pageable) {
+        try {
+            Page<FieldDto> fieldDtoList = service.findBySourceId(task.getSourceId(), pageable);
+            Integer count = service.countAllFieldDto(task.getSourceId());
+            String domainText = "FIO";
             for (int i = 0; i < count; i++) {
                 if (i == 0) {
                     List<FieldDto> fieldDto = fieldDtoList.getContent();
@@ -51,16 +59,15 @@ public class Controller {
                         profileResultService.saveProfileResult(f.getFieldId(), LocalDate.now(), domainText, null);
                     }
                 }
-
             }
             task.setStatus(ProfileTask.Status.DONE.toString());
-        }
-        else {
+            taskService.save(task);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (Exception e) {
             task.setStatus(ProfileTask.Status.ERROR.toString());
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        taskService.save(task);
     }
-  //Если не устроит что fio выводит 2 вместо допустим 6, то я делаю цикл foreach не по самому объекут fieldDto, а внутри его по списку массива, fieldDto.getFieldValue().size()
 
 
 }
