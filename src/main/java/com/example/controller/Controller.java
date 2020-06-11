@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class Controller {
@@ -32,14 +34,15 @@ public class Controller {
         if(task.getSourceId()!=null && task.getId()!=null) {
             task.setStatus(ProfileTask.Status.RUNNING.toString());
             taskService.save(task);
-           return returnProfileResult(task,pageable);
+            Executors.newScheduledThreadPool(1).schedule(() -> createProfileResult(task,pageable), 1, TimeUnit.SECONDS);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
         }
         else {
            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
     }
-    private ResponseEntity returnProfileResult(ProfileTask task, Pageable pageable) {
+    private void createProfileResult(ProfileTask task, Pageable pageable) {
         try {
             Page<FieldDto> fieldDtoList = service.findBySourceId(task.getSourceId(), pageable);
             Integer count = service.countAllFieldDto(task.getSourceId());
@@ -49,6 +52,7 @@ public class Controller {
                     List<FieldDto> fieldDto = fieldDtoList.getContent();
                     for (FieldDto f : fieldDto) {
                         //Отправка моего DTO во внешний сервис и затем получаю домен
+                        //Если field пустойvalue, то все равно добавить
                         profileResultService.saveProfileResult(f.getFieldId(), LocalDate.now(), domainText, null);
                     }
                 } else {
@@ -62,12 +66,9 @@ public class Controller {
             }
             task.setStatus(ProfileTask.Status.DONE.toString());
             taskService.save(task);
-            return new ResponseEntity<>(HttpStatus.ACCEPTED);
         } catch (Exception e) {
             task.setStatus(ProfileTask.Status.ERROR.toString());
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+          //  return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
     }
-
-
 }
